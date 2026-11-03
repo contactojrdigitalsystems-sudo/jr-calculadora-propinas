@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Split — Calculadora de propinas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Outfit", "system-ui", "sans-serif"],
+            },
+            colors: {
+              ink: "#141414",
+              mist: "#f4f2ee",
+              sage: "#2f6f5e",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen bg-mist text-ink font-sans antialiased">
+    <main class="mx-auto flex min-h-screen max-w-5xl items-start px-4 py-6 sm:px-6 sm:py-10 lg:items-center">
+      <section class="grid w-full overflow-hidden rounded-3xl bg-white shadow-[0_24px_80px_rgba(20,20,20,0.08)] lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="p-8 sm:p-10 lg:p-12">
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-sage">Split</p>
+          <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Calculadora de propinas</h1>
+          <p class="mt-3 max-w-md text-sm leading-6 text-neutral-500">
+            Introduce la cuenta, elige la propina y divide el total entre las personas.
+          </p>
+
+          <form id="calculator" class="mt-10 space-y-8" autocomplete="off">
+            <fieldset>
+              <legend class="mb-3 text-sm font-medium">Moneda</legend>
+              <div id="currency-presets" class="grid grid-cols-3 gap-2">
+                <button type="button" data-currency="EUR" class="currency-btn is-active rounded-2xl bg-ink py-3 text-sm font-medium text-white transition">€ Euro</button>
+                <button type="button" data-currency="USD" class="currency-btn rounded-2xl bg-mist py-3 text-sm font-medium transition hover:bg-neutral-200">$ Dólar</button>
+                <button type="button" data-currency="GBP" class="currency-btn rounded-2xl bg-mist py-3 text-sm font-medium transition hover:bg-neutral-200">£ Libra</button>
+              </div>
+            </fieldset>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium">Cuenta total</span>
+              <div class="relative">
+                <span id="currency-symbol" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">€</span>
+                <input
+                  id="bill"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  class="w-full rounded-2xl border border-neutral-200 bg-mist/60 py-3.5 pl-10 pr-4 text-lg outline-none transition focus:border-sage focus:bg-white focus:ring-4 focus:ring-sage/10"
+                />
+              </div>
+            </label>
+
+            <fieldset>
+              <legend class="mb-3 text-sm font-medium">Propina</legend>
+              <div id="tip-presets" class="grid grid-cols-4 gap-2">
+                <button type="button" data-tip="10" class="tip-btn rounded-2xl bg-mist py-3 text-sm font-medium transition hover:bg-neutral-200">10%</button>
+                <button type="button" data-tip="15" class="tip-btn rounded-2xl bg-mist py-3 text-sm font-medium transition hover:bg-neutral-200">15%</button>
+                <button type="button" data-tip="18" class="tip-btn is-active rounded-2xl bg-ink py-3 text-sm font-medium text-white transition">18%</button>
+                <button type="button" data-tip="20" class="tip-btn rounded-2xl bg-mist py-3 text-sm font-medium transition hover:bg-neutral-200">20%</button>
+              </div>
+              <div class="relative mt-3">
+                <input
+                  id="custom-tip"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.1"
+                  placeholder="Personalizada %"
+                  class="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 px-4 outline-none transition focus:border-sage focus:ring-4 focus:ring-sage/10"
+                />
+              </div>
+            </fieldset>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium">Número de personas</span>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  id="minus"
+                  class="grid h-12 w-12 place-items-center rounded-2xl bg-mist text-xl transition hover:bg-neutral-200"
+                  aria-label="Restar persona"
+                >
+                  −
+                </button>
+                <input
+                  id="people"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value="2"
+                  class="h-12 w-full rounded-2xl border border-neutral-200 bg-white text-center text-lg outline-none transition focus:border-sage focus:ring-4 focus:ring-sage/10"
+                />
+                <button
+                  type="button"
+                  id="plus"
+                  class="grid h-12 w-12 place-items-center rounded-2xl bg-mist text-xl transition hover:bg-neutral-200"
+                  aria-label="Sumar persona"
+                >
+                  +
+                </button>
+              </div>
+            </label>
+          </form>
+        </div>
+
+        <aside class="flex flex-col justify-between bg-ink p-8 text-white sm:p-10 lg:p-12">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.22em] text-white/50">Resumen</p>
+            <div class="mt-8 space-y-6">
+              <div class="flex items-end justify-between gap-4">
+                <div>
+                  <p class="text-sm text-white/55">Propina</p>
+                  <p class="text-xs text-white/35">del total</p>
+                </div>
+                <p id="tip-amount" class="text-2xl font-medium tabular-nums">€0.00</p>
+              </div>
+              <div class="flex items-end justify-between gap-4">
+                <div>
+                  <p class="text-sm text-white/55">Total con propina</p>
+                  <p class="text-xs text-white/35">cuenta + propina</p>
+                </div>
+                <p id="total-amount" class="text-2xl font-medium tabular-nums">€0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-10 rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
+            <p class="text-sm text-white/55">Cada persona paga</p>
+            <p id="per-person" class="mt-2 text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">€0.00</p>
+            <p id="split-label" class="mt-3 text-sm text-white/40">Dividido entre 2 personas</p>
+            <button
+              type="button"
+              id="export-ticket"
+              class="mt-6 w-full rounded-2xl bg-white py-3.5 text-sm font-medium text-ink transition hover:bg-mist"
+            >
+              Exportar ticket
+            </button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const billInput = document.getElementById("bill");
+      const customTip = document.getElementById("custom-tip");
+      const peopleInput = document.getElementById("people");
+      const tipButtons = document.querySelectorAll(".tip-btn");
+      const currencyButtons = document.querySelectorAll(".currency-btn");
+      const currencySymbolEl = document.getElementById("currency-symbol");
+      const tipAmountEl = document.getElementById("tip-amount");
+      const totalAmountEl = document.getElementById("total-amount");
+      const perPersonEl = document.getElementById("per-person");
+      const splitLabelEl = document.getElementById("split-label");
+      const exportButton = document.getElementById("export-ticket");
+
+      const currencies = {
+        EUR: { locale: "es-ES", symbol: "€", label: "euros" },
+        USD: { locale: "en-US", symbol: "$", label: "dólares" },
+        GBP: { locale: "en-GB", symbol: "£", label: "libras" },
+      };
+
+      let selectedTip = 18;
+      let selectedCurrency = "EUR";
+      let lastResult = null;
+
+      const money = (value) => {
+        const { locale } = currencies[selectedCurrency];
+        return new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency: selectedCurrency,
+        }).format(Number.isFinite(value) ? value : 0);
+      };
+
+      function setActiveCurrencyButton(code) {
+        currencyButtons.forEach((button) => {
+          const isActive = button.dataset.currency === code;
+          button.classList.toggle("bg-ink", isActive);
+          button.classList.toggle("text-white", isActive);
+          button.classList.toggle("bg-mist", !isActive);
+          button.classList.toggle("is-active", isActive);
+        });
+      }
+
+      function setActiveTipButton(tip) {
+        tipButtons.forEach((button) => {
+          const isActive = Number(button.dataset.tip) === tip && customTip.value === "";
+          button.classList.toggle("bg-ink", isActive);
+          button.classList.toggle("text-white", isActive);
+          button.classList.toggle("bg-mist", !isActive);
+          button.classList.toggle("is-active", isActive);
+        });
+      }
+
+      function calculate() {
+        const bill = Math.max(0, Number(billInput.value) || 0);
+        const people = Math.max(1, Math.floor(Number(peopleInput.value) || 1));
+        const tipPercent = Math.max(0, Number(customTip.value || selectedTip) || 0);
+        const tip = bill * (tipPercent / 100);
+        const total = bill + tip;
+        const perPerson = total / people;
+
+        peopleInput.value = people;
+        currencySymbolEl.textContent = currencies[selectedCurrency].symbol;
+        tipAmountEl.textContent = money(tip);
+        totalAmountEl.textContent = money(total);
+        perPersonEl.textContent = money(perPerson);
+        splitLabelEl.textContent =
+          people === 1 ? "Paga una sola persona" : `Dividido entre ${people} personas`;
+
+        lastResult = { bill, people, tipPercent, tip, total, perPerson };
+      }
+
+      tipButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedTip = Number(button.dataset.tip);
+          customTip.value = "";
+          setActiveTipButton(selectedTip);
+          calculate();
+        });
+      });
+
+      customTip.addEventListener("input", () => {
+        if (customTip.value !== "") {
+          selectedTip = Number(customTip.value) || 0;
+          setActiveTipButton(null);
+        } else {
+          selectedTip = 18;
+          setActiveTipButton(selectedTip);
+        }
+        calculate();
+      });
+
+      document.getElementById("minus").addEventListener("click", () => {
+        peopleInput.value = Math.max(1, (Number(peopleInput.value) || 1) - 1);
+        calculate();
+      });
+
+      document.getElementById("plus").addEventListener("click", () => {
+        peopleInput.value = (Number(peopleInput.value) || 1) + 1;
+        calculate();
+      });
+
+      [billInput, peopleInput].forEach((input) => {
+        input.addEventListener("input", calculate);
+      });
+
+      currencyButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedCurrency = button.dataset.currency;
+          setActiveCurrencyButton(selectedCurrency);
+          calculate();
+        });
+      });
+
+      function buildTicket(result) {
+        const now = new Intl.DateTimeFormat("es-ES", {
+          dateStyle: "long",
+          timeStyle: "short",
+        }).format(new Date());
+        const line = "------------------------------";
+        const pad = (label, value) => `${label.padEnd(16)}${value}`;
+
+        return [
+          "SPLIT",
+          "Ticket de cuenta",
+          now,
+          line,
+          pad("Moneda:", currencies[selectedCurrency].label),
+          pad("Cuenta:", money(result.bill)),
+          pad(`Propina (${result.tipPercent}%):`, money(result.tip)),
+          pad("Total:", money(result.total)),
+          pad("Personas:", String(result.people)),
+          pad("Cada persona:", money(result.perPerson)),
+          line,
+          "Gracias por usar Split",
+          "",
+        ].join("\r\n");
+      }
+
+      exportButton.addEventListener("click", () => {
+        if (!lastResult) calculate();
+        const ticket = buildTicket(lastResult);
+        const blob = new Blob([ticket], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const stamp = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.download = `ticket-split-${stamp}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+
+        const original = exportButton.textContent;
+        exportButton.textContent = "Ticket descargado";
+        setTimeout(() => {
+          exportButton.textContent = original;
+        }, 1600);
+      });
+
+      setActiveCurrencyButton(selectedCurrency);
+      setActiveTipButton(selectedTip);
+      calculate();
+    </script>
+  </body>
+</html>
